@@ -1,0 +1,18 @@
+import axios from 'axios';
+import { StatesResponse } from '../interfaces/IIngresso';
+
+const api = axios.create({
+  baseURL: 'https://api-content.ingresso.com/v0/',
+});
+
+// states
+
+export const getStates = async (): Promise<Array<StatesResponse>> =>
+  await api.get('/states');
+
+export const getCities = async (uf: string): Promise<StatesResponse> =>
+  await api.get(`/states/${uf}`);
+
+// sessions
+export const getSessions = async (cityId: number, eventId: number) =>
+  await api.get(`/sessions/city/${cityId}/event/${eventId}`);
