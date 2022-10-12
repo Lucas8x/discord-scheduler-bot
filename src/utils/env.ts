@@ -1,7 +1,7 @@
 import 'dotenv/config';
 
-export const env = {
-  token: process.env.TOKEN,
-  clientId: process.env.CLIENT_ID,
-  guildId: process.env.GUILD_ID,
-};
+const token = process.env.TOKEN;
+const clientId = process.env.CLIENT_ID;
+const guildId = process.env.GUILD_ID;
+
+export const env = { token, clientId, guildId };

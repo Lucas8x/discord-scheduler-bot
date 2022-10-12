@@ -9,13 +9,13 @@ export abstract class MovieModel {
 
   public getID = (): number => this.id;
 
-  private setID = (id: number) => {
+  public setID = (id: number) => {
     this.id = id;
   };
 
   public getName = () => this.name;
 
-  private setName = (name: string) => {
+  public setName = (name: string) => {
     this.name = name;
   };
 

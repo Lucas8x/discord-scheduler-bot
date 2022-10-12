@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { StatesResponse } from '../interfaces/IIngresso';
+import { StatesResponse } from '../../interfaces/IIngresso';
 
 const api = axios.create({
   baseURL: 'https://api-content.ingresso.com/v0/',

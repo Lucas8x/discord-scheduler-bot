@@ -1,7 +1,10 @@
 import { Client, GatewayIntentBits, Collection, Interaction } from 'discord.js';
+import chalk from 'chalk';
 import { loadCommands, deployCommands, env } from './utils';
 
 const { token } = env;
+
+const log = (msg: string) => console.log(chalk`[{magenta BOT}] ${msg}`);
 
 interface ExtendClient extends Client {
   commands?: Collection<any, any>;
@@ -36,8 +39,8 @@ client.on('interactionCreate', async (interaction: Interaction) => {
   }
 });
 
-client.once('ready', () => console.log('[BOT] Ready!'));
+client.once('ready', () => log('Ready!'));
 
-client.on('error', (e) => console.error('[BOT][ERROR]', e));
+client.on('error', (e) => console.error(chalk`[{magenta BOT}][ERROR]`, e));
 
 client.login(token);

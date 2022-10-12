@@ -9,11 +9,11 @@ const data = new SlashCommandBuilder()
   /* .addStringOption((option) =>
     option.setName('url').setDescription('Movie url').setRequired(true)
   ) */
-  .addNumberOption((option) =>
-    option.setName('Movie ID').setDescription('Movie ID')
+  .addIntegerOption((option) =>
+    option.setName('movieid').setDescription('Movie ID')
   )
-  .addNumberOption((option) =>
-    option.setName('City ID').setDescription('City ID')
+  .addIntegerOption((option) =>
+    option.setName('cityid').setDescription('City ID')
   )
   .addBooleanOption((option) =>
     option.setName('onlydub').setDescription('Only Dub ?')
@@ -28,9 +28,12 @@ async function execute(interaction: any) {
     /*const url = options.getString('url');
     if (!url || !validateUrl(url)) return;*/
 
+    const movieId = options.getInteger('movieid');
+    const cityId = options.getInteger('cityid');
+
     const onlyDub = options.getBoolean('onlydub');
 
-    const movie = new IngressoModel(123);
+    const movie = new IngressoModel(24274);
     const response = await movie.fetch();
     if (!response) return;
 
