@@ -15,4 +15,6 @@ export const getCities = async (uf: string): Promise<StatesResponse> =>
 
 // sessions
 export const getSessions = async (cityId: number, eventId: number) =>
-  await api.get(`/sessions/city/${cityId}/event/${eventId}`);
+  await api.get(
+    `/sessions/city/${cityId}/event/${eventId}?&includeOperationPolicies=false`
+  );

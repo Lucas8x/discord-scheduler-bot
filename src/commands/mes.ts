@@ -5,19 +5,19 @@ import { validateUrl } from '../utils';
 
 const data = new SlashCommandBuilder()
   .setName('mes')
-  .setDescription('create movie event')
-  /* .addStringOption((option) =>
+  .setDescription('create movie event');
+/* .addStringOption((option) =>
     option.setName('url').setDescription('Movie url').setRequired(true)
-  ) */
-  .addIntegerOption((option) =>
+  )
+.addIntegerOption((option) =>
     option.setName('movieid').setDescription('Movie ID')
   )
   .addIntegerOption((option) =>
     option.setName('cityid').setDescription('City ID')
-  )
-  .addBooleanOption((option) =>
-    option.setName('onlydub').setDescription('Only Dub ?')
   );
+.addBooleanOption((option) =>
+    option.setName('onlydub').setDescription('Only Dub ?')
+  );*/
 
 async function execute(interaction: any) {
   try {
@@ -28,10 +28,9 @@ async function execute(interaction: any) {
     /*const url = options.getString('url');
     if (!url || !validateUrl(url)) return;*/
 
-    const movieId = options.getInteger('movieid');
-    const cityId = options.getInteger('cityid');
-
-    const onlyDub = options.getBoolean('onlydub');
+    //const movieId = options.getInteger('movieid');
+    //const cityId = options.getInteger('cityid');
+    //const onlyDub = options.getBoolean('onlydub');
 
     const movie = new IngressoModel(24274);
     const response = await movie.fetch();
@@ -40,10 +39,10 @@ async function execute(interaction: any) {
     //const { id } = await createEvent(movie);
 
     await interaction.editReply({
-      content: `${movie.getName()} successfully scheduled.\nCheckout: https://discord.com/events/575815357609148426/1005235427113979995`,
+      content: `${movie.getName()} successfully scheduled.\nCheckout: link`,
     });
   } catch (error) {
-    console.log(`[COMMANDS|MES]${error}`);
+    console.error(`[COMMANDS|MES]${error}`);
   }
 }
 

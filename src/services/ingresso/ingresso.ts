@@ -4,31 +4,31 @@ import { AxiosResponse } from 'axios';
 import { getSessions } from './api';
 import { StatesResponse } from '../../interfaces/IIngresso';
 
-const log = (msg: string) => console.log(chalk`[{blue SERVICES}] ${msg}`);
+const log = (msg: string) =>
+  console.log(chalk`[{blue SERVICES|INGRESSO}] ${msg}`);
 
 interface Props {
   url?: string;
   eventId?: number;
   cityId?: number;
-  date?: string;
 }
+
+type IReturn = Promise<AxiosResponse | undefined>;
 
 export async function IngressoService({
   url,
   eventId,
   cityId,
-  date,
-}: Props): Promise<AxiosResponse | undefined> {
+}: Props): IReturn {
   try {
-    if (!eventId) return;
-    if (!date) date = moment().format('YYYY-MM-DD');
-    if (!cityId) cityId = 53; // maceió
+    if (!eventId) throw Error('NO EVENT ID');
+    if (!cityId) throw Error('NO CITY ID');
 
-    log(`Fetching sessions for movie ${eventId} on ${date}`);
+    log(`Fetching sessions for movie ${eventId}`);
 
     return await getSessions(cityId, eventId);
   } catch (error) {
     console.error(`[SERVICES|INGRESSO] ${error}`);
-    return;
+    throw error;
   }
 }

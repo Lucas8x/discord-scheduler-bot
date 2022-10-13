@@ -10,18 +10,22 @@ export class IngressoModel extends MovieModel {
     super(id);
   }
 
-  async fetch(): Promise<boolean> {
+  async fetch(): Promise<any> {
     try {
       const response = await IngressoService({ eventId: this.getID() });
-      if (!response) return false;
+      if (!response) throw Error('NO SERVICE RESPONSE');
 
       const { data, status } = response;
+
+      if (status === 404 || data?.title === 'Not Found')
+        throw Error('PROBABLY NO SESSIONS');
 
       console.log(data);
       //this.setName('')
       return true;
     } catch (error) {
-      throw Error('[MODEL|INGRESSO]');
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
     }
   }
 }
