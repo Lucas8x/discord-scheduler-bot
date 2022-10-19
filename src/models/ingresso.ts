@@ -1,31 +1,57 @@
 import chalk from 'chalk';
-import { IngressoService } from '../services/ingresso/ingresso';
-import { MovieModel } from './movie';
+import { getMovieDataByUrlKey, getSessions } from '../services/ingresso/api';
 
 const log = (msg: string) =>
-  console.log(chalk`[{yellow MODEL|INGRESSO}] ${msg}`);
+  console.log(chalk`[{yellow MODEL}|{yellow INGRESSO}] ${msg}`);
 
-export class IngressoModel extends MovieModel {
-  constructor(id: number) {
-    super(id);
+export class IngressoModel {
+  private name: string | null;
+  private eventId: string | number | null;
+  private data: object | null;
+
+  constructor(public key: string) {
+    this.key = key;
+    this.name = null;
+    this.eventId = null;
+    this.data = null;
   }
 
-  async fetch(): Promise<any> {
+  public getName = () => this.name;
+  public setName = (newName: string) => (this.name = newName);
+
+  public async fetchData(): Promise<boolean> {
     try {
-      const response = await IngressoService({ eventId: this.getID() });
-      if (!response) throw Error('NO SERVICE RESPONSE');
-
-      const { data, status } = response;
-
-      if (status === 404 || data?.title === 'Not Found')
-        throw Error('PROBABLY NO SESSIONS');
-
-      console.log(data);
-      //this.setName('')
+      const { data, status } = await getMovieDataByUrlKey(this.key);
+      if (status !== 200) throw Error("COULDN'T LOAD MOVIE INFO.");
+      const { id, title } = data;
+      this.eventId = id;
+      this.name = title;
       return true;
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
     }
   }
+
+  public async fetchSessions(cityId: number): Promise<boolean> {
+    try {
+      if (!this.eventId) throw Error('NO EVENT ID.');
+
+      const response = await getSessions(cityId, this.eventId);
+      if (!response) throw Error('NO SERVICE RESPONSE.');
+
+      const { data, status } = response;
+
+      if (status !== 200 || data?.title === 'Not Found')
+        throw Error('PROBABLY NO SESSIONS.');
+
+      this.data = data;
+      return true;
+    } catch (error) {
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
+    }
+  }
+
+  public convert() {}
 }

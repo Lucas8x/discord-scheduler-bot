@@ -9,13 +9,10 @@ const data = new SlashCommandBuilder()
 /* .addStringOption((option) =>
     option.setName('url').setDescription('Movie url').setRequired(true)
   )
-.addIntegerOption((option) =>
-    option.setName('movieid').setDescription('Movie ID')
-  )
   .addIntegerOption((option) =>
     option.setName('cityid').setDescription('City ID')
   );
-.addBooleanOption((option) =>
+  .addBooleanOption((option) =>
     option.setName('onlydub').setDescription('Only Dub ?')
   );*/
 
@@ -28,13 +25,19 @@ async function execute(interaction: any) {
     /*const url = options.getString('url');
     if (!url || !validateUrl(url)) return;*/
 
-    //const movieId = options.getInteger('movieid');
     //const cityId = options.getInteger('cityid');
     //const onlyDub = options.getBoolean('onlydub');
 
-    const movie = new IngressoModel(24274);
-    const response = await movie.fetch();
-    if (!response) return;
+    const url =
+      'https://www.ingresso.com/filme/adao-negro?city=maceio&partnership=home&target=em-alta#!#data=20221019';
+    if (!url) throw Error('MISSING URL');
+
+    const urlKey = url.split('/')?.pop()?.split('?')[0];
+    if (!urlKey) throw Error('COULDNT FIND MOVIE KEY.');
+
+    const movie = new IngressoModel(urlKey);
+    await movie.fetchData();
+    await movie.fetchSessions(53);
 
     //const { id } = await createEvent(movie);
 
@@ -43,6 +46,9 @@ async function execute(interaction: any) {
     });
   } catch (error) {
     console.error(`[COMMANDS|MES]${error}`);
+    await interaction.editReply({
+      content: error,
+    });
   }
 }
 
