@@ -1,5 +1,5 @@
-import { Client, GatewayIntentBits, Collection, Interaction } from 'discord.js';
 import chalk from 'chalk';
+import { Client, GatewayIntentBits, Collection, Interaction } from 'discord.js';
 import { loadCommands, deployCommands, env } from './utils';
 
 const { token } = env;
@@ -26,7 +26,7 @@ deployCommands();
 client.on('interactionCreate', async (interaction: Interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  const command = client.commands.get(interaction.commandName);
+  const command = client.commands?.get(interaction.commandName);
   if (!command) return;
 
   try {

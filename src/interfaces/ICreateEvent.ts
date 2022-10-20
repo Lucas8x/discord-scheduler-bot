@@ -1,20 +1,20 @@
-interface Session {
+export interface Session {
   time: string;
   types: Array<string>;
 }
 
-interface Room {
+export interface Room {
   name: string;
   sessions: Array<Session>;
 }
 
-interface Theather {
+export interface Theater {
   name: string;
   rooms: Array<Room>;
 }
 
 export interface ICreateEvent {
-  theaters: Array<Theather>;
+  theaters: Array<Theater>;
   date: string;
   dateFormatted: string;
 }

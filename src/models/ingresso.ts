@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { ingressoFilter } from '../filters/ingressoFilter';
 import { ICreateEvent } from '../interfaces/ICreateEvent';
 import { getMovieDataByUrlKey, getSessions } from '../services/ingresso/api';
 
@@ -55,8 +56,14 @@ export class IngressoModel {
   }
 
   public convert(): ICreateEvent | undefined {
-    if (!this.data) return;
+    try {
+      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+      if (!Array.isArray(this.data)) throw Error('DATA ISNT THE CORRECT TYPE');
 
-    return;
+      return ingressoFilter(this.data);
+    } catch (error) {
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
+    }
   }
 }
