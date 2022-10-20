@@ -1286,12 +1286,13 @@ function filterTheater(theater) {
   };
 }
 
-const dayItem = data[0];
-const { date, dateFormatted, theaters } = dayItem;
-const result = theaters.map((t) => ({
-  date,
-  dateFormatted,
-  theaters: filterTheater(t),
-}));
+const finalData = data.map((t) => {
+  const { date, dateFormatted, theaters } = t;
+  return {
+    date,
+    dateFormatted,
+    theaters: theaters.map(filterTheater),
+  };
+});
 
-result.forEach((i) => console.log(i));
+finalData.forEach((i) => console.log(i));
