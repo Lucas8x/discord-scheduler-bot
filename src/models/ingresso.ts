@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { ICreateEvent } from '../interfaces/ICreateEvent';
 import { getMovieDataByUrlKey, getSessions } from '../services/ingresso/api';
 
 const log = (msg: string) =>
@@ -53,5 +54,9 @@ export class IngressoModel {
     }
   }
 
-  public convert() {}
+  public convert(): ICreateEvent | undefined {
+    if (!this.data) return;
+
+    return;
+  }
 }

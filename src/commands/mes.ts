@@ -39,7 +39,7 @@ async function execute(interaction: any) {
     await movie.fetchData();
     await movie.fetchSessions(53);
 
-    //const { id } = await createEvent(movie);
+    const { id } = await createEvent(movie);
 
     await interaction.editReply({
       content: `${movie.getName()} successfully scheduled.\nCheckout: link`,

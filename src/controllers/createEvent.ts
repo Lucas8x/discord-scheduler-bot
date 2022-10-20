@@ -1,9 +1,12 @@
 import { GuildScheduledEventManager } from 'discord.js';
+import { IngressoModel } from '../models';
 
-export async function createEvent(movie: any) {
+export async function createEvent(movie: IngressoModel) {
   try {
     const movieName = movie.getName();
     console.log(`Scheduling: ${movieName} ...`);
+
+    const data = movie.convert();
 
     /*await GuildScheduledEventManager.create({
       name: movieName,
