@@ -39,7 +39,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
     await movie.fetchData();
     await movie.fetchSessions(53);*/
 
-    const { id } = await createEvent(interaction.guildId!);
+    const { id } = await createEvent();
 
     await interaction.editReply({
       //content: `${movie.getName()} successfully scheduled.\nCheckout: link`,
@@ -48,7 +48,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
   } catch (error) {
     console.error(`[COMMANDS|MES]${error}`);
     await interaction.editReply({
-      content: String(error),
+      content: 'Something went wrong.',
     });
   }
 }

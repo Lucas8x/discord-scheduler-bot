@@ -1,8 +1,7 @@
 import chalk from 'chalk';
 import { Client, GatewayIntentBits, Collection, Interaction } from 'discord.js';
-import { loadCommands, deployCommands, env } from './utils';
-
-const { token } = env;
+import { loadCommands, deployCommands, config } from './utils';
+const { TOKEN } = config;
 
 const log = (msg: string) => console.log(chalk`[{magenta BOT}] ${msg}`);
 
@@ -43,4 +42,4 @@ client.once('ready', () => log('Ready!'));
 
 client.on('error', (e) => console.error(chalk`[{magenta BOT}][ERROR]`, e));
 
-client.login(token);
+client.login(TOKEN);
