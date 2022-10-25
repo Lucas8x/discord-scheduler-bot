@@ -1,17 +1,21 @@
 import { Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import chalk from 'chalk';
-import { loadCommands, config } from '.';
+import { loadCommands } from '.';
 
-const { TOKEN, CLIENT_ID, GUILD_ID } = config;
+interface Props {
+  token: string;
+  clientId: string;
+  guildId: string;
+}
 
-export function deployCommands() {
+export function deployCommands({ token, clientId, guildId }: Props) {
   const commands = loadCommands().map((c) => c.data.toJSON());
 
-  const rest = new REST({ version: '10' }).setToken(TOKEN);
+  const rest = new REST({ version: '10' }).setToken(token);
 
   rest
-    .put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
+    .put(Routes.applicationGuildCommands(clientId, guildId), {
       body: commands,
     })
     .then(() => console.log(chalk`[{green UTILS}] Registered commands.`))

@@ -1,48 +1,62 @@
-import axios from 'axios';
-import moment from 'moment';
+import { Moment } from 'moment';
 import { Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
 
-import { IngressoModel } from '../models';
 import { config } from '../utils';
-const { TOKEN, GUILD_ID } = config;
+const { TOKEN } = config;
 
-export async function createEvent(movie?: IngressoModel) {
+interface Props {
+  name: string;
+  description: string;
+  startTime: Moment;
+  endTime: Moment;
+  location: string;
+  guildId: string;
+}
+
+type Return = Promise<{ id?: string }>;
+
+export async function createEvent({
+  name,
+  description,
+  startTime,
+  endTime,
+  location,
+  guildId,
+}: Props): Return {
   try {
-    //const movieName = movie.getName();
-    //console.log(`Scheduling: ${movieName} ...`);
+    if (!TOKEN) throw Error('NO TOKEN');
 
-    //const data = movie.convert();
-
-    console.log(`Creating event for ${'adon negro'}`);
-
-    const startTime = moment().add(1, 'd');
-    const endTime = moment().add(2, 'd');
+    console.log(`Creating event for ${name}`);
 
     const eventData = {
-      name: 'adon negro',
-      description: 'teste',
+      name,
+      description,
       privacy_level: 2,
       scheduled_start_time: startTime.toISOString(),
       scheduled_end_time: endTime.toISOString(),
       entity_type: 3,
       entity_metadata: {
-        location: 'shops',
+        location,
       },
     };
 
+    let id;
     const rest = new REST({ version: '10' }).setToken(TOKEN);
-
-    rest
-      .post(Routes.guildScheduledEvents(GUILD_ID), {
+    await rest
+      .post(Routes.guildScheduledEvents(guildId), {
         body: eventData,
       })
-      .then(() => {})
-      .catch(() => {});
+      .then((data) => {
+        id = data.id;
+        console.log(`Event creation done: ${name}`);
+      })
+      .catch((error) => {
+        throw error;
+      });
 
-    //console.log(`Schedule done: ${movieName}`);
     return {
-      id: '123',
+      id,
     };
   } catch (error) {
     console.error(`[createEvent][ERROR] ${error}`);

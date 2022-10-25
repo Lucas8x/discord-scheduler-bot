@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { IngressoModel } from '../models';
 import { createEvent } from '../controllers/createEvent';
 import { validateUrl } from '../utils';
+import moment from 'moment';
 
 const data = new SlashCommandBuilder()
   .setName('mes')
@@ -18,7 +19,9 @@ const data = new SlashCommandBuilder()
 
 async function execute(interaction: ChatInputCommandInteraction) {
   try {
-    const { options } = interaction;
+    const { options, guildId } = interaction;
+    if (!guildId) throw 'NO GUILD ID';
+
     await interaction.deferReply({
       ephemeral: false,
     });
@@ -26,6 +29,8 @@ async function execute(interaction: ChatInputCommandInteraction) {
     if (!url || !validateUrl(url)) return;*/
 
     //const cityId = options.getInteger('cityid');
+    //if (cityId.length > 3) {return}
+
     //const onlyDub = options.getBoolean('onlydub');
 
     /*const url =
@@ -39,11 +44,26 @@ async function execute(interaction: ChatInputCommandInteraction) {
     await movie.fetchData();
     await movie.fetchSessions(53);*/
 
-    const { id } = await createEvent();
+    const startTime = moment().add(1, 'd');
+    const endTime = moment().add(2, 'd');
+
+    const { id } = await createEvent({
+      name: 'adão negro',
+      description: 'teste description',
+      startTime: startTime,
+      endTime: endTime,
+      location: 'Shopping',
+      guildId,
+    });
+
+    const link = `https://discord.com/events/${guildId}/${id}`;
+
+    const message = id
+      ? `Successfully scheduled: ${'adão negro'}\nCheckout: ${link}`
+      : 'Event schedule failed.';
 
     await interaction.editReply({
-      //content: `${movie.getName()} successfully scheduled.\nCheckout: link`,
-      content: `successfully scheduled.\nCheckout: ${id}`,
+      content: message,
     });
   } catch (error) {
     console.error(`[COMMANDS|MES]${error}`);
