@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { Client, GatewayIntentBits, Collection, Interaction } from 'discord.js';
+
 import { loadCommands, deployCommands, config } from './utils';
 const { TOKEN, CLIENT_ID, GUILD_ID } = config;
 

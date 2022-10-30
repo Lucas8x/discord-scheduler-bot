@@ -1,6 +1,7 @@
 import { Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
 import chalk from 'chalk';
+
 import { loadCommands } from '.';
 
 interface Props {

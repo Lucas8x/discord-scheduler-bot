@@ -1,4 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+
 import { IngressoModel } from '../models';
 import { createEvent } from '../controllers/createEvent';
 import { validateUrl } from '../utils';
@@ -20,36 +21,38 @@ const data = new SlashCommandBuilder()
 async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const { options, guildId } = interaction;
-    if (!guildId) throw 'NO GUILD ID';
+    if (!guildId) throw Error('NO GUILD ID.');
 
     await interaction.deferReply({
       ephemeral: false,
     });
-    /*const url = options.getString('url');
-    if (!url || !validateUrl(url)) return;*/
+    const url = options.getString('url');
+    if (!url) throw Error('MISSING URL.');
+    if (!validateUrl(url)) throw Error('INVALID URL.');
 
     //const cityId = options.getInteger('cityid');
     //if (cityId.length > 3) {return}
 
     //const onlyDub = options.getBoolean('onlydub');
 
-    /*const url =
-      'https://www.ingresso.com/filme/adao-negro?city=maceio&partnership=home&target=em-alta#!#data=20221019';
-    if (!url) throw Error('MISSING URL');
-
     const urlKey = url.split('/')?.pop()?.split('?')[0];
     if (!urlKey) throw Error('COULDNT FIND MOVIE KEY.');
 
     const movie = new IngressoModel(urlKey);
     await movie.fetchData();
-    await movie.fetchSessions(53);*/
+    await movie.fetchSessions(53);
 
-    const startTime = moment().add(1, 'd');
+    const data = movie.convert();
+    if (!data) throw Error('NO DATA AFTER CONVERTSION.');
+
+    const { date } = data;
+
+    const startTime = moment(date);
     const endTime = moment().add(2, 'd');
 
     const { id } = await createEvent({
-      name: 'adão negro',
-      description: 'teste description',
+      name: movie.getName() || 'UNDEFINED MOVIE NAME',
+      description: 'test description',
       startTime: startTime,
       endTime: endTime,
       location: 'Shopping',
