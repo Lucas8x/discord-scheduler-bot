@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+
 import { ingressoFilter } from '../filters/ingressoFilter';
 import { ICreateEvent } from '../interfaces/ICreateEvent';
 import { getMovieDataByUrlKey, getSessions } from '../services/ingresso/api';
@@ -25,9 +26,12 @@ export class IngressoModel {
     try {
       const { data, status } = await getMovieDataByUrlKey(this.key);
       if (status !== 200) throw Error("COULDN'T LOAD MOVIE INFO.");
+
       const { id, title } = data;
+
       this.eventId = id;
       this.name = title;
+
       return true;
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);
@@ -43,7 +47,6 @@ export class IngressoModel {
       if (!response) throw Error('NO SERVICE RESPONSE.');
 
       const { data, status } = response;
-
       if (status !== 200 || data?.title === 'Not Found')
         throw Error('PROBABLY NO SESSIONS.');
 

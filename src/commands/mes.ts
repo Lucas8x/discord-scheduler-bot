@@ -1,9 +1,9 @@
+import moment from 'moment';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 import { IngressoModel } from '../models';
 import { createEvent } from '../controllers/createEvent';
 import { validateUrl } from '../utils';
-import moment from 'moment';
 
 const data = new SlashCommandBuilder()
   .setName('mes')
