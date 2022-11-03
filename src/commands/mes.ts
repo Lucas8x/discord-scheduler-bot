@@ -7,11 +7,11 @@ import { validateUrl } from '../utils';
 
 const data = new SlashCommandBuilder()
   .setName('mes')
-  .setDescription('create movie event');
-/* .addStringOption((option) =>
+  .setDescription('create movie event')
+  .addStringOption((option) =>
     option.setName('url').setDescription('Movie url').setRequired(true)
-  )
-  .addIntegerOption((option) =>
+  );
+/*.addIntegerOption((option) =>
     option.setName('cityid').setDescription('City ID')
   );
   .addBooleanOption((option) =>
@@ -45,14 +45,24 @@ async function execute(interaction: ChatInputCommandInteraction) {
     const data = movie.convert();
     if (!data) throw Error('NO DATA AFTER CONVERTSION.');
 
-    const { date } = data;
+    const { date, theaters } = data;
 
-    const startTime = moment(date);
+    /* const theatersNames = theaters.map((j) => j.name);
+    // TODO: ASK USER
+    const selectedTheater = 'Kinoplex Maceió';
+
+    const selectedTheaterObj = theaters.find(
+      (j) => j.name === selectedTheater
+    );
+
+    const { rooms } = selectedTheaterObj; */
+
+    const startTime = moment().add(1, 'd');
     const endTime = moment().add(2, 'd');
 
     const { id } = await createEvent({
       name: movie.getName() || 'UNDEFINED MOVIE NAME',
-      description: 'test description',
+      description: 'test\n description\n\n teste',
       startTime: startTime,
       endTime: endTime,
       location: 'Shopping',
@@ -62,13 +72,13 @@ async function execute(interaction: ChatInputCommandInteraction) {
     const link = `https://discord.com/events/${guildId}/${id}`;
 
     const message = id
-      ? `Successfully scheduled: ${'adão negro'}\nCheckout: ${link}`
+      ? `Successfully scheduled: ${movie.getName()}\nCheckout: ${link}`
       : 'Event schedule failed.';
 
     await interaction.editReply({
       content: message,
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`[COMMANDS|MES]${error}`);
     await interaction.editReply({
       content: 'Something went wrong.',

@@ -69,4 +69,31 @@ export class IngressoModel {
       throw error;
     }
   }
+
+  /* public getAllTheatersName(): Array<string> {
+    try {
+      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+    } catch (error) {
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
+    }
+  } */
+
+  /* public getOneTheater(theater: string) {
+    try {
+      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+    } catch (error) {
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
+    }
+  } */
+
+  /* public getDubRooms() {
+    try {
+      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+    } catch (error) {
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
+    }
+  } */
 }
