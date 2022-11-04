@@ -1300,11 +1300,16 @@ const description = finalData[0].theaters.map((theater) => {
   const roomStr = rooms.map((room) => {
     const { sessions } = room;
 
-    return [room.name, sessions.map((session) => session.time).join(' | ')];
+    return [
+      room.name,
+      sessions
+        .map((session) => `[${session.types[1]}] ${session.time}`)
+        .join(' | '),
+    ].join(' - ');
   });
 
   const theaterStr = [theater.name, roomStr];
-  return theaterStr;
+  return theaterStr.flat();
 });
 
-description;
+description.flat().join('\n');

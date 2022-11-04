@@ -70,14 +70,14 @@ export class IngressoModel {
     }
   }
 
-  /* public getAllTheatersName(): Array<string> {
+  /*public getAllTheatersName(): Array<string> {
     try {
       if (!this.data) throw Error('NO DATA FOR CONVERTION');
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
     }
-  } */
+  }*/
 
   /* public getOneTheater(theater: string) {
     try {
@@ -96,4 +96,15 @@ export class IngressoModel {
       throw error;
     }
   } */
+
+  public toString(): string {
+    try {
+      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+      const description = [];
+      return description.flat().join('\n');
+    } catch (error) {
+      console.error(`[MODEL|INGRESSO] ${error}`);
+      throw error;
+    }
+  }
 }

@@ -60,7 +60,7 @@ async function execute(interaction: ChatInputCommandInteraction) {
     const startTime = moment().add(1, 'd');
     const endTime = moment().add(2, 'd');
 
-    const description = ['test', 'description'].join('\n');
+    const description = movie.toString();
 
     const { id } = await createEvent({
       name: movie.getName() || 'UNDEFINED MOVIE NAME',
