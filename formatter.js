@@ -1295,4 +1295,16 @@ const finalData = data.map((t) => {
   };
 });
 
-finalData.forEach((i) => console.log(i));
+const description = finalData[0].theaters.map((theater) => {
+  const { rooms } = theater;
+  const roomStr = rooms.map((room) => {
+    const { sessions } = room;
+
+    return [room.name, sessions.map((session) => session.time).join(' | ')];
+  });
+
+  const theaterStr = [theater.name, roomStr];
+  return theaterStr;
+});
+
+description;

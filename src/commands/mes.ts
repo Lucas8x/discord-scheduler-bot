@@ -60,14 +60,18 @@ async function execute(interaction: ChatInputCommandInteraction) {
     const startTime = moment().add(1, 'd');
     const endTime = moment().add(2, 'd');
 
+    const description = ['test', 'description'].join('\n');
+
     const { id } = await createEvent({
       name: movie.getName() || 'UNDEFINED MOVIE NAME',
-      description: 'test\n description\n\n teste',
+      description,
       startTime: startTime,
       endTime: endTime,
       location: 'Shopping',
       guildId,
     });
+
+    if (!id) throw Error('NO EVENT ID');
 
     const link = `https://discord.com/events/${guildId}/${id}`;
 

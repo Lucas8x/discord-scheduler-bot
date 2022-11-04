@@ -41,7 +41,7 @@ export async function createEvent({
       },
     };
 
-    let id;
+    let id: string | undefined;
     const rest = new REST({ version: '10' }).setToken(TOKEN);
     await rest
       .post(Routes.guildScheduledEvents(guildId), {
