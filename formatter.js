@@ -1308,7 +1308,7 @@ const description = finalData[0].theaters.map((theater) => {
     ].join(' - ');
   });
 
-  const theaterStr = [theater.name, roomStr];
+  const theaterStr = [theater.name, roomStr, null];
   return theaterStr.flat();
 });
 

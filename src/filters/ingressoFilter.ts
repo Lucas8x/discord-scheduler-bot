@@ -60,4 +60,4 @@ export function ingressoFilter(data: Array<Item>): ICreateEvent {
   return response;
 }
 
-/* export function ingressoDataToString(Theater: Theater) {} */
+export function ingressoTheaterToString(Theater: Theater) {}
