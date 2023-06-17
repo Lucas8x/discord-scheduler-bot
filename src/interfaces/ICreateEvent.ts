@@ -1,20 +1,20 @@
-export interface Session {
+export interface ISession {
   time: string;
   types: Array<string>;
 }
 
-export interface Room {
+export interface IRoom {
   name: string;
-  sessions: Array<Session>;
+  sessions: Array<ISession>;
 }
 
-export interface Theater {
+export interface ITheater {
   name: string;
-  rooms: Array<Room>;
+  rooms: Array<IRoom>;
 }
 
 export interface ICreateEvent {
-  theaters: Array<Theater>;
+  theaters: Array<ITheater>;
   date: string;
   dateFormatted: string;
 }
