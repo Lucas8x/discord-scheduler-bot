@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "main": "dist/bot.js",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "dev": " tsnd --transpile-only --rs --ignore-watch node_modules --watch src src/index.ts",
     "build": "tsc --build",
