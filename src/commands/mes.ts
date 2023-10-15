@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
 import { IngressoModel } from '../models';
@@ -57,8 +57,8 @@ async function execute(interaction: ChatInputCommandInteraction) {
 
     const { rooms } = selectedTheaterObj; */
 
-    const startTime = moment().add(1, 'd');
-    const endTime = moment().add(2, 'd');
+    const startTime = dayjs().add(1, 'd');
+    const endTime = dayjs().add(2, 'd');
 
     const description = movie.toString();
 

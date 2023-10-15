@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import { Dayjs } from 'dayjs';
 import { Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
 
@@ -8,8 +8,8 @@ const { TOKEN } = config;
 interface Props {
   name: string;
   description: string;
-  startTime: Moment;
-  endTime: Moment;
+  startTime: Dayjs;
+  endTime: Dayjs;
   location: string;
   guildId: string;
 }
