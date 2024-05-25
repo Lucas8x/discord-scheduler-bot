@@ -1,15 +1,15 @@
 import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
-import { IngressoModel } from '../models';
-import { createEvent } from '../controllers/createEvent';
-import { validateUrl } from '../utils';
+import { IngressoModel } from '@/providers';
+import { createEvent } from '@/controllers/createEvent';
+import { validateUrl } from '@/utils';
 
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName('mes')
   .setDescription('create movie event')
   .addStringOption((option) =>
-    option.setName('url').setDescription('Movie url').setRequired(true)
+    option.setName('url').setDescription('Movie url').setRequired(true),
   );
 /*.addIntegerOption((option) =>
     option.setName('cityid').setDescription('City ID')
@@ -18,7 +18,7 @@ const data = new SlashCommandBuilder()
     option.setName('onlydub').setDescription('Only Dub ?')
   );*/
 
-async function execute(interaction: ChatInputCommandInteraction) {
+export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const { options, guildId } = interaction;
     if (!guildId) throw Error('NO GUILD ID.');
@@ -28,6 +28,8 @@ async function execute(interaction: ChatInputCommandInteraction) {
     });
     const url = options.getString('url');
     if (!url) throw Error('MISSING URL.');
+
+    //TODO: check url then use appropriate provider
     if (!validateUrl(url)) throw Error('INVALID URL.');
 
     //const cityId = options.getInteger('cityid');
@@ -36,16 +38,18 @@ async function execute(interaction: ChatInputCommandInteraction) {
     //const onlyDub = options.getBoolean('onlydub');
 
     const urlKey = url.split('/')?.pop()?.split('?')[0];
-    if (!urlKey) throw Error('COULDNT FIND MOVIE KEY.');
+    if (!urlKey) throw Error('COULD NOT FIND MOVIE KEY.');
 
     const movie = new IngressoModel(urlKey);
     await movie.fetchData();
+
+    //TODO: prompt city from user or set a default on first install
     await movie.fetchSessions(53);
 
     const data = movie.convert();
-    if (!data) throw Error('NO DATA AFTER CONVERTSION.');
+    if (!data) throw Error('NO DATA AFTER CONVERSION.');
 
-    const { date, theaters } = data;
+    const { date, theaters } = data[0];
 
     /* const theatersNames = theaters.map((j) => j.name);
     // TODO: ASK USER
@@ -89,8 +93,3 @@ async function execute(interaction: ChatInputCommandInteraction) {
     });
   }
 }
-
-module.exports = {
-  data,
-  execute,
-};

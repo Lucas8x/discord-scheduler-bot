@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs';
+import { type Dayjs } from 'dayjs';
 import { Routes } from 'discord.js';
 import { REST } from '@discordjs/rest';
 
@@ -43,6 +43,7 @@ export async function createEvent({
 
     let id: string | undefined;
     const rest = new REST({ version: '10' }).setToken(TOKEN);
+
     await rest
       .post(Routes.guildScheduledEvents(guildId), {
         body: eventData,

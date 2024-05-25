@@ -1,8 +1,7 @@
 import chalk from 'chalk';
 
-import { ingressoFilter } from '../filters/ingressoFilter';
-import { ICreateEvent } from '../interfaces/ICreateEvent';
-import { getMovieDataByUrlKey, getSessions } from '../services/ingresso/api';
+import { getMovieDataByUrlKey, getSessions } from './api';
+import { ingressoFilter } from './filter';
 
 const log = (msg: string) =>
   console.log(chalk`[{yellow MODEL}|{yellow INGRESSO}] ${msg}`);
@@ -58,10 +57,11 @@ export class IngressoModel {
     }
   }
 
-  public convert(): ICreateEvent | undefined {
+  public convert(): ICreateEvent[] | undefined {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERTION');
-      if (!Array.isArray(this.data)) throw Error('DATA ISNT THE CORRECT TYPE');
+      if (!this.data) throw Error('NO DATA FOR CONVERSION');
+      if (!Array.isArray(this.data))
+        throw Error('DATA IS NOT THE CORRECT TYPE');
 
       return ingressoFilter(this.data);
     } catch (error) {
@@ -72,7 +72,7 @@ export class IngressoModel {
 
   /*public getAllTheatersName(): Array<string> {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+      if (!this.data) throw Error('NO DATA FOR CONVERSION');
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
@@ -81,7 +81,7 @@ export class IngressoModel {
 
   /* public getOneTheater(theater: string) {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+      if (!this.data) throw Error('NO DATA FOR CONVERSION');
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
@@ -90,7 +90,7 @@ export class IngressoModel {
 
   /* public getDubRooms() {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERTION');
+      if (!this.data) throw Error('NO DATA FOR CONVERSION');
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
@@ -99,8 +99,8 @@ export class IngressoModel {
 
   public toString(): string {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERTION');
-      const description = [];
+      if (!this.data) throw Error('NO DATA FOR CONVERSION');
+      const description: string[] = []; //TODO: Create description of each room/date/session/theater
       return description.flat().join('\n');
     } catch (error) {
       console.error(`[MODEL|INGRESSO] ${error}`);

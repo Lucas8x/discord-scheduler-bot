@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { StatesResponse } from '../../interfaces/IIngresso';
 
 const api = axios.create({
   baseURL: 'https://api-content.ingresso.com/v0/',
@@ -22,8 +21,8 @@ export const getCities = async (uf: string): Promise<StatesResponse> =>
 // sessions
 export const getSessions = async (
   cityId: number | string,
-  eventId: number | string
+  eventId: number | string,
 ) =>
   await api.get(
-    `/sessions/city/${cityId}/event/${eventId}?&includeOperationPolicies=false`
+    `/sessions/city/${cityId}/event/${eventId}?&includeOperationPolicies=false`,
   );

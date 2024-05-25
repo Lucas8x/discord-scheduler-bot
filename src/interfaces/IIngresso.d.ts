@@ -1,4 +1,4 @@
-export interface City {
+interface City {
   id: string;
   name: string;
   uf: string;
@@ -7,8 +7,8 @@ export interface City {
   timeZone: string;
 }
 
-export interface StatesResponse {
+interface StatesResponse {
   name: string;
   uf: string;
-  cities: Array<City>;
+  cities: City[];
 }

@@ -1,5 +1,3 @@
-import { ICreateEvent } from '../interfaces/ICreateEvent';
-
 interface Session {
   time: string;
   types: Array<{
@@ -47,7 +45,7 @@ interface Item {
   dateFormatted: string;
 }
 
-export function ingressoFilter(data: Array<Item>): ICreateEvent {
+export function ingressoFilter(data: Array<Item>): ICreateEvent[] {
   const response = data.map((t) => {
     const { date, dateFormatted, theaters } = t;
     return {

@@ -7,6 +7,11 @@ export function loadCommands() {
     .readdirSync(commandsPath)
     .filter((file) => file.endsWith('.ts'));
 
+  if (commandFiles.length === 0) {
+    console.error('[UTILS|LOAD COMMANDS] NO COMMANDS FOUND');
+    return [];
+  }
+
   const commands = commandFiles.map((file) => {
     const filePath = path.join(commandsPath, file);
     return require(filePath);

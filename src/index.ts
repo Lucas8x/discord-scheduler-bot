@@ -1,5 +1,10 @@
 import chalk from 'chalk';
-import { Client, GatewayIntentBits, Collection, Interaction } from 'discord.js';
+import {
+  Client,
+  GatewayIntentBits,
+  Collection,
+  type Interaction,
+} from 'discord.js';
 
 import { loadCommands, deployCommands, config } from './utils';
 const { TOKEN, CLIENT_ID, GUILD_ID } = config;
@@ -7,7 +12,7 @@ const { TOKEN, CLIENT_ID, GUILD_ID } = config;
 const log = (msg: string) => console.log(chalk`[{magenta BOT}] ${msg}`);
 
 interface ExtendClient extends Client {
-  commands?: Collection<any, any>;
+  commands?: Collection<string, any>;
 }
 
 function init() {
