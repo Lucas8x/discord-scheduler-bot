@@ -1,7 +1,9 @@
 {
-  "name": "discordbot",
-  "version": "0.0.1",
+  "name": "discord-scheduler-bot",
+  "version": "0.1.0",
+  "description": "Schedule a movie event on discord",
   "module": "index.ts",
+  "author": "Lucas8x",
   "license": "MIT",
   "type": "module",
   "scripts": {
@@ -26,5 +28,20 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lucas8x/discord-scheduler-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lucas8x/discord-scheduler-bot/issues"
+  },
+  "homepage": "https://github.com/Lucas8x/discord-scheduler-bot",
+  "keywords": [
+    "discord",
+    "movie",
+    "scheduler",
+    "event",
+    "JavaScript"
+  ]
 }
