@@ -42,7 +42,7 @@ export class IngressoModel {
 
       return true;
     } catch (error) {
-      log.error(`[PROVIDER][INGRESSO] ${error}`);
+      log.error(error);
       throw error;
     }
   }
@@ -61,7 +61,7 @@ export class IngressoModel {
       this.data = data;
       return true;
     } catch (error) {
-      log.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(error);
       throw error;
     }
   }
@@ -74,7 +74,7 @@ export class IngressoModel {
 
       return ingressoFilter(this.data);
     } catch (error) {
-      log.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(error);
       throw error;
     }
   }
@@ -112,7 +112,7 @@ export class IngressoModel {
       const description: string[] = []; //TODO: Create description of each room/date/session/theater
       return description.flat().join('\n');
     } catch (error) {
-      log.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(error);
       throw error;
     }
   }
