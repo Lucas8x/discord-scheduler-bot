@@ -1,9 +1,7 @@
 import dayjs from 'dayjs';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 
-import { IngressoModel } from '@/providers';
-import { createEvent } from '@/controllers/createEvent';
-import { validateUrl } from '@/utils';
+import { getProvider } from '@/providers/getProvider';
 
 export const data = new SlashCommandBuilder()
   .setName('mes')
@@ -20,27 +18,26 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
-    const { options, guildId } = interaction;
+    const { options, guildId, guild } = interaction;
     if (!guildId) throw Error('NO GUILD ID.');
+    if (!guild) throw Error('NO GUILD.');
 
     await interaction.deferReply({
       ephemeral: false,
     });
+
     const url = options.getString('url');
     if (!url) throw Error('MISSING URL.');
 
-    //TODO: check url then use appropriate provider
-    if (!validateUrl(url)) throw Error('INVALID URL.');
+    const Provider = getProvider(url);
+    if (!Provider) throw Error('INVALID URL.');
 
     //const cityId = options.getInteger('cityid');
     //if (cityId.length > 3) {return}
 
     //const onlyDub = options.getBoolean('onlydub');
 
-    const urlKey = url.split('/')?.pop()?.split('?')[0];
-    if (!urlKey) throw Error('COULD NOT FIND MOVIE KEY.');
-
-    const movie = new IngressoModel(urlKey);
+    const movie = new Provider(url);
     await movie.fetchData();
 
     //TODO: prompt city from user or set a default on first install
@@ -63,31 +60,33 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const startTime = dayjs().add(1, 'd');
     const endTime = dayjs().add(2, 'd');
-
     const description = movie.toString();
 
-    const { id } = await createEvent({
-      name: movie.getName() || 'UNDEFINED MOVIE NAME',
+    const { id, url: eventURL } = await guild.scheduledEvents.create({
+      name: movie.getName() || 'UNKNOWN MOVIE NAME',
       description,
-      startTime: startTime,
-      endTime: endTime,
-      location: 'Shopping',
-      guildId,
+      privacyLevel: 2,
+      scheduledStartTime: startTime.toISOString(),
+      scheduledEndTime: endTime.toISOString(),
+      entityType: 3,
+      entityMetadata: {
+        location: 'Shopping',
+      },
     });
 
     if (!id) throw Error('NO EVENT ID');
-
-    const link = `https://discord.com/events/${guildId}/${id}`;
+    if (!eventURL) throw Error('NO EVENT URL');
 
     const message = id
-      ? `Successfully scheduled: ${movie.getName()}\nCheckout: ${link}`
+      ? `Successfully scheduled: ${movie.getName()}\nCheckout: ${eventURL}`
       : 'Event schedule failed.';
 
     await interaction.editReply({
       content: message,
     });
   } catch (error: unknown) {
-    console.error(`[COMMANDS|MES]${error}`);
+    console.error(`[ERROR][COMMANDS][MES] ${error}`);
+
     await interaction.editReply({
       content: 'Something went wrong.',
     });

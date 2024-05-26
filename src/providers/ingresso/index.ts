@@ -3,19 +3,26 @@ import chalk from 'chalk';
 import { getMovieDataByUrlKey, getSessions } from './api';
 import { ingressoFilter } from './filter';
 
-const log = (msg: string) =>
-  console.log(chalk`[{yellow MODEL}|{yellow INGRESSO}] ${msg}`);
+const prefix = chalk`[{yellow PROVIDER}][{yellow INGRESSO}]`;
+const log = {
+  log: (...args: any[]) => console.log(prefix, ...args),
+  error: (...args: any[]) => console.error(prefix, ...args),
+};
 
 export class IngressoModel {
-  private name: string | null;
-  private eventId: string | number | null;
-  private data: object | null;
+  private name?: string;
+  private eventId?: string | number;
+  private data?: object;
+  private movieID?: string;
 
-  constructor(public key: string) {
-    this.key = key;
-    this.name = null;
-    this.eventId = null;
-    this.data = null;
+  constructor(public url: string) {
+    this.url = url;
+
+    const movieID = url.split('/')?.pop()?.split('?')[0];
+    if (!movieID) {
+      throw Error('[ingresso] COULD NOT FIND MOVIE KEY.');
+    }
+    this.movieID = movieID;
   }
 
   public getName = () => this.name;
@@ -23,7 +30,9 @@ export class IngressoModel {
 
   public async fetchData(): Promise<boolean> {
     try {
-      const { data, status } = await getMovieDataByUrlKey(this.key);
+      if (!this.movieID) throw Error('NO MOVIE ID.');
+      log.log('fetching data...');
+      const { data, status } = await getMovieDataByUrlKey(this.movieID);
       if (status !== 200) throw Error("COULDN'T LOAD MOVIE INFO.");
 
       const { id, title } = data;
@@ -33,7 +42,7 @@ export class IngressoModel {
 
       return true;
     } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(`[PROVIDER][INGRESSO] ${error}`);
       throw error;
     }
   }
@@ -52,7 +61,7 @@ export class IngressoModel {
       this.data = data;
       return true;
     } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
     }
   }
@@ -65,7 +74,7 @@ export class IngressoModel {
 
       return ingressoFilter(this.data);
     } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
     }
   }
@@ -103,7 +112,7 @@ export class IngressoModel {
       const description: string[] = []; //TODO: Create description of each room/date/session/theater
       return description.flat().join('\n');
     } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
+      log.error(`[MODEL|INGRESSO] ${error}`);
       throw error;
     }
   }
