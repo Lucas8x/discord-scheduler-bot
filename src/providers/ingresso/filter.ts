@@ -1,11 +1,4 @@
-interface Session {
-  time: string;
-  types: Array<{
-    alias: string;
-  }>;
-}
-
-function filterSession(session: Session) {
+function filterSession(session: IIngressoSession) {
   const { time, types } = session;
   return {
     time,
@@ -13,12 +6,7 @@ function filterSession(session: Session) {
   };
 }
 
-interface Room {
-  name: string;
-  sessions: Array<Session>;
-}
-
-function filterRoom(room: Room) {
+function filterRoom(room: IIngressoRoom) {
   const { name, sessions } = room;
   return {
     name,
@@ -26,12 +14,7 @@ function filterRoom(room: Room) {
   };
 }
 
-interface Theater {
-  name: string;
-  rooms: Array<Room>;
-}
-
-function filterTheater(theater: Theater) {
+function filterTheater(theater: IIngressoTheater) {
   const { name, rooms } = theater;
   return {
     name,
@@ -39,13 +22,7 @@ function filterTheater(theater: Theater) {
   };
 }
 
-interface Item {
-  theaters: Array<Theater>;
-  date: string;
-  dateFormatted: string;
-}
-
-export function ingressoFilter(data: Array<Item>): ICreateEvent[] {
+export function ingressoFilter(data: IIngressoDayEntry[]): ICreateEvent[] {
   const response = data.map((t) => {
     const { date, dateFormatted, theaters } = t;
     return {
@@ -58,4 +35,20 @@ export function ingressoFilter(data: Array<Item>): ICreateEvent[] {
   return response;
 }
 
-export function ingressoTheaterToString(Theater: Theater) {}
+export function theaterToString(theater: IIngressoTheater) {
+  const { rooms } = theater;
+
+  const roomString = rooms.map((room) => {
+    const { name, sessions } = room;
+
+    return [
+      name,
+      sessions
+        .map((session) => `[${session.types[1]}] ${session.time}`)
+        .join(' | '),
+    ].join(' - ');
+  });
+
+  const theaterString = [theater.name, roomString, ''].flat();
+  return theaterString.flat();
+}

@@ -5,24 +5,29 @@ const api = axios.create({
 });
 
 // events
-export const getMovieDataByID = async (id: string) =>
-  await api.get(`/events/${id}`);
+/* export async function getMovieDataByID(id: string) {
+  return await api.get<IIngressoMovieDataResponse>(`/events/${id}`);
+} */
 
-export const getMovieDataByUrlKey = async (urlKey: string) =>
-  await api.get(`/events/url-key/${urlKey}`);
+export async function getMovieDataByUrlKey(urlKey: string) {
+  return await api.get<IIngressoMovieDataResponse>(`/events/url-key/${urlKey}`);
+}
 
 // states
-export const getStates = async (): Promise<Array<StatesResponse>> =>
-  await api.get('/states');
+export async function getStates() {
+  return await api.get<IIngressoStatesResponse[]>('/states');
+}
 
-export const getCities = async (uf: string): Promise<StatesResponse> =>
-  await api.get(`/states/${uf}`);
+export async function getCities(uf: string) {
+  return await api.get<IIngressoStatesResponse>(`/states/${uf}`);
+}
 
 // sessions
-export const getSessions = async (
+export async function getSessions(
   cityId: number | string,
   eventId: number | string,
-) =>
-  await api.get(
+) {
+  return await api.get<IIngressoGetSessionsResponse>(
     `/sessions/city/${cityId}/event/${eventId}?&includeOperationPolicies=false`,
   );
+}

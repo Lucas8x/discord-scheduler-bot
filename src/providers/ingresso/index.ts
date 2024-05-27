@@ -5,8 +5,8 @@ import { ingressoFilter } from './filter';
 
 const prefix = chalk`[{yellow PROVIDER}][{yellow INGRESSO}]`;
 const log = {
-  log: (...args: any[]) => console.log(prefix, ...args),
-  error: (...args: any[]) => console.error(prefix, ...args),
+  log: (...args: unknown[]) => console.log(prefix, ...args),
+  error: (...args: unknown[]) => console.error(prefix, ...args),
 };
 
 export class IngressoModel {
@@ -33,7 +33,9 @@ export class IngressoModel {
       if (!this.movieID) throw Error('NO MOVIE ID.');
       log.log('fetching data...');
       const { data, status } = await getMovieDataByUrlKey(this.movieID);
-      if (status !== 200) throw Error("COULDN'T LOAD MOVIE INFO.");
+      if (status !== 200) {
+        throw Error("COULDN'T LOAD MOVIE INFO.");
+      }
 
       const { id, title } = data;
 
@@ -52,11 +54,17 @@ export class IngressoModel {
       if (!this.eventId) throw Error('NO EVENT ID.');
 
       const response = await getSessions(cityId, this.eventId);
-      if (!response) throw Error('NO SERVICE RESPONSE.');
+      if (!response) {
+        throw Error('NO SERVICE RESPONSE.');
+      }
 
       const { data, status } = response;
-      if (status !== 200 || data?.title === 'Not Found')
+      if (
+        status !== 200 ||
+        (!Array.isArray(data) && data?.title === 'Not Found')
+      ) {
         throw Error('PROBABLY NO SESSIONS.');
+      }
 
       this.data = data;
       return true;
@@ -68,9 +76,12 @@ export class IngressoModel {
 
   public convert(): ICreateEvent[] | undefined {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERSION');
-      if (!Array.isArray(this.data))
+      if (!this.data) {
+        throw Error('NO DATA FOR CONVERSION');
+      }
+      if (!Array.isArray(this.data)) {
         throw Error('DATA IS NOT THE CORRECT TYPE');
+      }
 
       return ingressoFilter(this.data);
     } catch (error) {
@@ -109,7 +120,10 @@ export class IngressoModel {
   public toString(): string {
     try {
       if (!this.data) throw Error('NO DATA FOR CONVERSION');
-      const description: string[] = []; //TODO: Create description of each room/date/session/theater
+
+      //TODO: Create description of each room/date/session/theater
+      const description: string[] = [];
+
       return description.flat().join('\n');
     } catch (error) {
       log.error(error);
@@ -117,3 +131,5 @@ export class IngressoModel {
     }
   }
 }
+
+export function setup() {}
