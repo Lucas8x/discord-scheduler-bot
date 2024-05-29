@@ -18,3 +18,13 @@ interface ICreateEvent {
   dateFormatted: string;
   theaters: ITheater[];
 }
+
+interface IState {
+  name: string;
+  uf: string;
+}
+
+interface ICity {
+  name: string;
+  id: string;
+}

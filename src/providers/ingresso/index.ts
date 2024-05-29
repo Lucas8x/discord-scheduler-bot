@@ -1,13 +1,16 @@
 import chalk from 'chalk';
 
-import { getMovieDataByUrlKey, getSessions } from './api';
+import { getMovieDataByUrlKey, getSessions, getStates } from './api';
 import { ingressoFilter } from './filter';
+import { FileCacheManager } from '@/utils/fileCacheManager';
 
 const prefix = chalk`[{yellow PROVIDER}][{yellow INGRESSO}]`;
 const log = {
   log: (...args: unknown[]) => console.log(prefix, ...args),
   error: (...args: unknown[]) => console.error(prefix, ...args),
 };
+
+const fileCache = FileCacheManager.getInstance();
 
 export class IngressoModel {
   private name?: string;
@@ -49,7 +52,7 @@ export class IngressoModel {
     }
   }
 
-  public async fetchSessions(cityId: number): Promise<boolean> {
+  public async fetchSessions(cityId: string | number): Promise<boolean> {
     try {
       if (!this.eventId) throw Error('NO EVENT ID.');
 
@@ -130,6 +133,42 @@ export class IngressoModel {
       throw error;
     }
   }
-}
 
-export function setup() {}
+  public async getStates(): Promise<IIngressoStatesResponse[]> {
+    try {
+      const cached = await fileCache.get('ingresso/states.json');
+
+      if (cached.data) {
+        return cached.data;
+      }
+
+      const { data, status } = await getStates();
+
+      if (status !== 200) {
+        throw Error("COULDN'T LOAD STATES FROM API");
+      }
+
+      await fileCache.set('ingresso/states.json', data);
+      return data;
+    } catch (error) {
+      log.error(error);
+      return [];
+    }
+  }
+
+  public async getCities(uf: string): Promise<IIngressoCity[]> {
+    try {
+      if (!uf) {
+        throw Error('Please provide a UF');
+      }
+      const states = await this.getStates();
+
+      const cities = states.find((state) => state.uf === uf)?.cities;
+
+      return cities || [];
+    } catch (error) {
+      log.error(error);
+      return [];
+    }
+  }
+}

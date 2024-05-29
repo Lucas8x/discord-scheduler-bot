@@ -18,9 +18,9 @@ export async function getStates() {
   return await api.get<IIngressoStatesResponse[]>('/states');
 }
 
-export async function getCities(uf: string) {
+/* export async function getCities(uf: string) {
   return await api.get<IIngressoStatesResponse>(`/states/${uf}`);
-}
+} */
 
 // sessions
 export async function getSessions(

@@ -15,7 +15,7 @@ interface ExtendClient extends Client {
   commands?: Collection<string, any>;
 }
 
-function init() {
+async function init() {
   try {
     if (!TOKEN) throw 'NO TOKEN';
     if (!CLIENT_ID) throw 'NO CLIENT ID';
@@ -31,8 +31,11 @@ function init() {
     });
 
     client.commands = new Collection();
-    loadCommands().forEach((c) => client.commands?.set(c.data.name, c));
+    const commands = loadCommands();
+
+    commands.forEach((c) => client.commands?.set(c.data.name, c));
     deployCommands({
+      commands,
       token: TOKEN,
       clientId: CLIENT_ID,
       guildId: GUILD_ID,
@@ -49,7 +52,7 @@ function init() {
       } catch (error) {
         await interaction.reply({
           content: 'Command error',
-          ephemeral: true,
+          ephemeral: true, // hide from everyone except the author
         });
       }
     });
