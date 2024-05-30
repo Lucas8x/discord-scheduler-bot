@@ -58,11 +58,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       throw Error('Could not load movie information.');
     }
 
-    const selectedOptions = {
-      uf: '',
-      city: '',
-    };
-
     const states = await movie.getStates();
     if (!states || states.length === 0) {
       throw Error('Could not load states.');
@@ -93,6 +88,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     });
 
     let cities: ICity[] = [];
+
+    const selectedOptions = {
+      uf: '',
+      city: '',
+      date: '',
+      theater: '',
+    };
+    let sessions: IIngressoDayEntry[] = [];
+    let selectedSession: IIngressoDayEntry | null = null;
 
     collector.on('collect', async (interaction) => {
       try {
@@ -130,32 +134,78 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
         if (customId === 'citySelect') {
           selectedOptions.city = choice;
-        }
 
-        if (selectedOptions.uf && selectedOptions.city) {
-          const sessions = await movie.fetchSessions(selectedOptions.city);
+          sessions = await movie.fetchSessions(selectedOptions.city);
           if (!sessions) {
             throw Error(`No sessions found in ${selectedOptions.city}.`);
           }
 
-          /*
-            const data = movie.convert();
-            if (!data) throw Error('NO DATA AFTER CONVERSION.');
+          const availableDates = sessions.map((j) => j.dateFormatted);
 
-            const selectedTheaterObj = theaters.find(
-              (j) => j.name === selectedTheater
+          const datesRow =
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+              new StringSelectMenuBuilder()
+                .setCustomId('dateSelect')
+                .setPlaceholder('Selecione o seu estado.')
+                .addOptions(
+                  availableDates.map((d) =>
+                    new StringSelectMenuOptionBuilder().setLabel(d).setValue(d),
+                  ),
+                ),
             );
 
-            const { rooms } = selectedTheaterObj;
-          */
+          await initialMessage.editReply({
+            content: 'Qual sessão deseja assistir?',
+            components: [datesRow],
+          });
+        }
 
-          //TODO: Prompt user to select a day
-          const { date, theaters } = sessions[0];
-          const theatersNames = theaters.map((j) => j.name);
+        if (customId === 'dateSelect') {
+          selectedOptions.date = choice;
 
-          //TODO: Use selected date
-          const startTime = dayjs().add(1, 'd');
-          const endTime = dayjs().add(2, 'd');
+          const dateSession = sessions.find((j) => j.dateFormatted === choice);
+
+          if (!dateSession) {
+            throw Error(`No sessions found on ${choice}.`);
+          }
+
+          selectedSession = dateSession;
+
+          const { theaters } = dateSession;
+
+          const theatersRow =
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+              new StringSelectMenuBuilder()
+                .setCustomId('theaterSelect')
+                .setPlaceholder('Selecione qual cinema.')
+                .addOptions(
+                  theaters.map(({ id, name }) =>
+                    new StringSelectMenuOptionBuilder()
+                      .setLabel(name)
+                      .setValue(id),
+                  ),
+                ),
+            );
+
+          await initialMessage.editReply({
+            content: 'Qual o cinema?',
+            components: [theatersRow],
+          });
+        }
+
+        if (customId === 'theaterSelect') {
+          selectedOptions.theater = choice;
+          if (!selectedSession) {
+            throw Error('Selected session not found.');
+          }
+
+          const { date, theaters } = selectedSession;
+          const selectedTheater = theaters.find(
+            ({ id }) => id === selectedOptions.theater,
+          );
+
+          const startTime = dayjs(date).hour(0).minute(0);
+          const endTime = dayjs(date).hour(23).minute(59);
 
           const { id, url: eventURL } = await guild.scheduledEvents.create({
             name: movie.getName() || 'UNKNOWN MOVIE NAME',
@@ -165,7 +215,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             scheduledEndTime: endTime.toISOString(),
             entityType: 3,
             entityMetadata: {
-              location: 'Shopping',
+              location: selectedTheater?.name || 'Unknown theater name',
             },
           });
 

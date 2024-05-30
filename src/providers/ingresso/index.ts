@@ -51,7 +51,7 @@ export class IngressoModel {
 
   public async fetchSessions(
     cityId: string | number,
-  ): Promise<IIngressoDayEntry[] | null> {
+  ): Promise<IIngressoDayEntry[]> {
     try {
       if (!this.eventId) throw Error('NO EVENT ID.');
 
@@ -72,7 +72,7 @@ export class IngressoModel {
       return data;
     } catch (error) {
       log.error(error);
-      return null;
+      return [];
     }
   }
 
