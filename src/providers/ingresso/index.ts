@@ -3,19 +3,16 @@ import chalk from 'chalk';
 import { getMovieDataByUrlKey, getSessions, getStates } from './api';
 import { ingressoFilter } from './filter';
 import { FileCacheManager } from '@/utils/fileCacheManager';
+import { Logger } from '@/utils/logger';
 
-const prefix = chalk`[{yellow PROVIDER}][{yellow INGRESSO}]`;
-const log = {
-  log: (...args: unknown[]) => console.log(prefix, ...args),
-  error: (...args: unknown[]) => console.error(prefix, ...args),
-};
+const log = new Logger('[Provider][Ingresso]', chalk.yellow);
 
 const fileCache = FileCacheManager.getInstance();
 
 export class IngressoModel {
   private name?: string;
   private eventId?: string | number;
-  private data?: object;
+  private data?: IIngressoDayEntry[];
   private movieID?: string;
 
   constructor(public url: string) {
@@ -48,11 +45,13 @@ export class IngressoModel {
       return true;
     } catch (error) {
       log.error(error);
-      throw error;
+      return false;
     }
   }
 
-  public async fetchSessions(cityId: string | number): Promise<boolean> {
+  public async fetchSessions(
+    cityId: string | number,
+  ): Promise<IIngressoDayEntry[] | null> {
     try {
       if (!this.eventId) throw Error('NO EVENT ID.');
 
@@ -70,10 +69,10 @@ export class IngressoModel {
       }
 
       this.data = data;
-      return true;
+      return data;
     } catch (error) {
       log.error(error);
-      throw error;
+      return null;
     }
   }
 

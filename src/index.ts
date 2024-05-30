@@ -6,10 +6,11 @@ import {
   type Interaction,
 } from 'discord.js';
 
+import { Logger } from './utils/logger';
 import { loadCommands, deployCommands, config } from './utils';
 const { TOKEN, CLIENT_ID, GUILD_ID } = config;
 
-const log = (msg: string) => console.log(chalk`[{magenta BOT}] ${msg}`);
+const log = new Logger('[BOT]', chalk.bgMagenta);
 
 interface ExtendClient extends Client {
   commands?: Collection<string, any>;
@@ -34,7 +35,7 @@ async function init() {
     const commands = loadCommands();
 
     commands.forEach((c) => client.commands?.set(c.data.name, c));
-    deployCommands({
+    await deployCommands({
       commands,
       token: TOKEN,
       clientId: CLIENT_ID,
@@ -50,6 +51,7 @@ async function init() {
       try {
         await command.execute(interaction);
       } catch (error) {
+        log.error(error instanceof Error ? error.message : error);
         await interaction.reply({
           content: 'Command error',
           ephemeral: true, // hide from everyone except the author
@@ -57,9 +59,11 @@ async function init() {
       }
     });
 
-    client.once('ready', () => log('Ready!'));
+    client.once('ready', () => log.log('Ready!'));
     client.on('error', (e) => console.error(chalk`[{magenta BOT}][ERROR]`, e));
     client.login(TOKEN);
+
+    process.on('SIGINT', () => client.destroy());
   } catch (error) {
     console.error(error);
     process.exit();

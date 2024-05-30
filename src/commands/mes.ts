@@ -3,20 +3,19 @@ import chalk from 'chalk';
 import {
   ChatInputCommandInteraction,
   SlashCommandBuilder,
-  ActionRow,
   ActionRowBuilder,
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   type Interaction,
   ComponentType,
-  TextInputBuilder,
-  TextInputStyle,
+  ApplicationCommand,
+  CommandInteraction,
 } from 'discord.js';
 
 import { getProvider } from '@/providers/getProvider';
 import { Logger } from '@/utils/logger';
 
-const log = new Logger('[Commands][MES]', chalk.green);
+const log = new Logger('[COMMANDS][MES]', chalk.green);
 
 export const data = new SlashCommandBuilder()
   .setName('mes')
@@ -27,7 +26,8 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
-    const { guildId, guild } = interaction;
+    console.log(interaction.locale);
+    const { guildId, guild, options } = interaction;
     if (!guildId) {
       throw Error('NO GUILD ID.');
     }
@@ -35,21 +35,28 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       throw Error('NO GUILD.');
     }
 
-    const { options } = interaction;
-
-    /* await interaction.reply({
+    const initialMessage = interaction;
+    await interaction.reply({
       content: 'Loading...',
-      fetchReply: true,
-    });  */
+    });
 
     const url = options.getString('url');
-    if (!url) throw Error('MISSING URL.');
+    if (!url) {
+      throw Error('Please provide a URL.');
+    }
 
     const Provider = getProvider(url);
-    if (!Provider) throw Error('INVALID URL.');
+    if (!Provider) {
+      throw Error('Unsupported service or invalid URL', {
+        cause: url,
+      });
+    }
 
     const movie = new Provider(url);
-    await movie.fetchData();
+    const movieData = await movie.fetchData();
+    if (!movieData) {
+      throw Error('Could not load movie information.');
+    }
 
     const selectedOptions = {
       uf: '',
@@ -61,20 +68,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       throw Error('Could not load states.');
     }
 
-    const ufRow = new ActionRowBuilder().addComponents(
+    const ufRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
       new StringSelectMenuBuilder()
         .setCustomId('ufSelect')
-        .setPlaceholder('Make a selection!')
+        .setPlaceholder('Selecione o seu estado.')
         .addOptions(
           states
-            .slice(0, 5)
+            .slice(0, 25)
             .map(({ name, uf }) =>
               new StringSelectMenuOptionBuilder().setLabel(name).setValue(uf),
             ),
         ),
     );
 
-    const firstMsg = await interaction.reply({
+    await interaction.editReply({
       content: 'Qual seu estado?',
       components: [ufRow],
     });
@@ -82,102 +89,119 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const collector = interaction.channel.createMessageComponentCollector({
       filter: (interaction) => interaction.user.id === interaction.member.id,
       componentType: ComponentType.StringSelect,
+      time: 60 * 1000,
     });
 
+    let cities: ICity[] = [];
+
     collector.on('collect', async (interaction) => {
-      const { customId, values } = interaction;
-      let [choice] = values;
+      try {
+        const { customId, values } = interaction;
+        const [choice] = values;
 
-      if (selectedOptions.uf && selectedOptions.city) {
-        collector.stop();
+        if (interaction.isStringSelectMenu()) {
+          await interaction.deferUpdate();
+        }
+
+        if (customId === 'ufSelect') {
+          selectedOptions.uf = choice;
+          cities = await movie.getCities(choice);
+          const cityRow =
+            new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+              new StringSelectMenuBuilder()
+                .setCustomId('citySelect')
+                .setPlaceholder('Selecione sua cidade.')
+                .addOptions(
+                  cities
+                    .slice(0, 25)
+                    .map(({ name, id }) =>
+                      new StringSelectMenuOptionBuilder()
+                        .setLabel(name)
+                        .setValue(id),
+                    ),
+                ),
+            );
+
+          await initialMessage.editReply({
+            content: 'Qual sua cidade?',
+            components: [cityRow],
+          });
+        }
+
+        if (customId === 'citySelect') {
+          selectedOptions.city = choice;
+        }
+
+        if (selectedOptions.uf && selectedOptions.city) {
+          const sessions = await movie.fetchSessions(selectedOptions.city);
+          if (!sessions) {
+            throw Error(`No sessions found in ${selectedOptions.city}.`);
+          }
+
+          /*
+            const data = movie.convert();
+            if (!data) throw Error('NO DATA AFTER CONVERSION.');
+
+            const selectedTheaterObj = theaters.find(
+              (j) => j.name === selectedTheater
+            );
+
+            const { rooms } = selectedTheaterObj;
+          */
+
+          //TODO: Prompt user to select a day
+          const { date, theaters } = sessions[0];
+          const theatersNames = theaters.map((j) => j.name);
+
+          //TODO: Use selected date
+          const startTime = dayjs().add(1, 'd');
+          const endTime = dayjs().add(2, 'd');
+
+          const { id, url: eventURL } = await guild.scheduledEvents.create({
+            name: movie.getName() || 'UNKNOWN MOVIE NAME',
+            description: movie.toString(),
+            privacyLevel: 2,
+            scheduledStartTime: startTime.toISOString(),
+            scheduledEndTime: endTime.toISOString(),
+            entityType: 3,
+            entityMetadata: {
+              location: 'Shopping',
+            },
+          });
+
+          if (!id) throw Error('NO EVENT ID');
+          if (!eventURL) throw Error('NO EVENT URL');
+
+          const message = id
+            ? `Successfully scheduled: ${movie.getName()}\nCheckout: ${eventURL}`
+            : 'Event schedule failed.';
+
+          await initialMessage.editReply({
+            content: message,
+            components: [],
+          });
+
+          collector.stop();
+        }
+      } catch (error) {
+        log.error('[Collector]', error);
       }
-
-      let cities: ICity[] = [];
-
-      if (customId === 'ufSelect') {
-        selectedOptions.uf = choice;
-        cities = await movie.getCities(choice);
-      }
-      if (customId === 'citySelect') {
-        selectedOptions.city = choice;
-      }
-
-      const cityRow = new ActionRowBuilder().addComponents(
-        new StringSelectMenuBuilder()
-          .setCustomId('citySelect')
-          .setPlaceholder('Make a selection!')
-          .addOptions(
-            cities
-              .slice(0, 5)
-              .map(({ id, name }) =>
-                new StringSelectMenuOptionBuilder().setLabel(name).setValue(id),
-              ),
-          ),
-      );
-
-      await interaction.update({
-        content: 'Qual sua cidade?',
-        components: [cityRow],
-      });
     });
 
     collector.on('end', async () => {
-      //await movie.fetchSessions(selectedOptions.city);
-
-      await firstMsg.edit({
-        content: 'Done',
+      /* await interaction.editReply({
+        content: 'Collector end',
         components: [],
-      });
+      }); */
     });
+  } catch (error) {
+    const isError = error instanceof Error;
+    const msg = isError ? error.message : 'Something went wrong.';
 
-    /*
-
-    const data = movie.convert();
-    if (!data) throw Error('NO DATA AFTER CONVERSION.');*/
-
-    //const { date, theaters } = data[0];
-
-    /* const theatersNames = theaters.map((j) => j.name);
-    // TODO: ASK USER
-    const selectedTheater = 'Kinoplex Maceió';
-
-    const selectedTheaterObj = theaters.find(
-      (j) => j.name === selectedTheater
-    );
-
-    const { rooms } = selectedTheaterObj; */
-
-    /* const startTime = dayjs().add(1, 'd');
-    const endTime = dayjs().add(2, 'd');
-
-    const { id, url: eventURL } = await guild.scheduledEvents.create({
-      name: movie.getName() || 'UNKNOWN MOVIE NAME',
-      description: movie.toString(),
-      privacyLevel: 2,
-      scheduledStartTime: startTime.toISOString(),
-      scheduledEndTime: endTime.toISOString(),
-      entityType: 3,
-      entityMetadata: {
-        location: 'Shopping',
-      },
-    });
-
-    if (!id) throw Error('NO EVENT ID');
-    if (!eventURL) throw Error('NO EVENT URL');
-
-    const message = id
-      ? `Successfully scheduled: ${movie.getName()}\nCheckout: ${eventURL}`
-      : 'Event schedule failed.';
-    */
-
-    /* await interaction.reply({
-      content: 'message',
-    }); */
-  } catch (error: unknown) {
-    log.error(`[MES] ${error}`);
+    log.error(msg, isError && error?.cause ? `> ${error.cause} <` : '');
 
     await interaction.editReply({
-      content: 'Something went wrong.',
+      content: msg,
     });
   }
 }

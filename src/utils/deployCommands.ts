@@ -9,7 +9,12 @@ interface Props {
   guildId: string;
 }
 
-export function deployCommands({ commands, token, clientId, guildId }: Props) {
+export async function deployCommands({
+  commands,
+  token,
+  clientId,
+  guildId,
+}: Props) {
   const commandsAsJson = commands.map((c) => c.data.toJSON());
 
   console.log(
@@ -18,14 +23,18 @@ export function deployCommands({ commands, token, clientId, guildId }: Props) {
 
   const rest = new REST({ version: '10' }).setToken(token);
 
-  rest
-    .put(Routes.applicationGuildCommands(clientId, guildId), {
-      body: commandsAsJson,
-    })
-    .then(() =>
-      console.log(
-        chalk`[{green UTILS}] ${commandsAsJson.length} Commands deployed.`,
-      ),
-    )
-    .catch((err) => console.error(chalk`[{red UTILS}] ${err.message}`));
+  try {
+    const data = await rest.put(
+      Routes.applicationGuildCommands(clientId, guildId),
+      {
+        body: commandsAsJson,
+      },
+    );
+
+    console.log(chalk`[{green UTILS}] ${data.length} Commands deployed.`);
+  } catch (error) {
+    const isError = error instanceof Error;
+    const msg = isError ? error.message : 'Unknown deploy error';
+    console.error(chalk`[{red UTILS}] ${msg}`);
+  }
 }
