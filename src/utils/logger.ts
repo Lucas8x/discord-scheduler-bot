@@ -19,29 +19,29 @@ class Logger {
 
   log = (...message: unknown[]) =>
     console.log(
-      this.color.bold(this.prefix),
       chalk.bgMagenta.bold(' LOG '),
+      this.color.bold(this.prefix),
       ...message,
     );
 
   info = (...message: unknown[]) =>
     console.info(
-      this.color.bold(this.prefix),
       chalk.bgMagenta.bold(' INFO '),
+      this.color.bold(this.prefix),
       ...message,
     );
 
   warn = (...message: unknown[]) =>
     console.error(
-      this.color.bold(this.prefix),
       chalk.bgYellow.bold(' WARN '),
+      this.color.bold(this.prefix),
       ...message,
     );
 
   error = (...message: unknown[]) =>
     console.error(
-      this.color.bold(this.prefix),
       chalk.bgRed.bold(' ERROR '),
+      this.color.bold(this.prefix),
       ...message,
     );
 }

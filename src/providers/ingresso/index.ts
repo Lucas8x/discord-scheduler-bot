@@ -6,14 +6,17 @@ import { FileCacheManager } from '@/utils/fileCacheManager';
 import { Logger } from '@/utils/logger';
 
 const log = new Logger('[Provider][Ingresso]', chalk.yellow);
-
 const fileCache = FileCacheManager.getInstance();
 
 export class IngressoModel {
   private name?: string;
   private eventId?: string | number;
-  private data?: IIngressoDayEntry[];
+  private data?: IIngressoMovieDataResponse;
+  private sessions?: IIngressoDayEntry[];
   private movieID?: string;
+
+  //private selectedSession?: IIngressoDayEntry;
+  //private selectedTheater?: IIngressoTheater;
 
   constructor(public url: string) {
     this.url = url;
@@ -26,19 +29,20 @@ export class IngressoModel {
   }
 
   public getName = () => this.name;
-  public setName = (newName: string) => (this.name = newName);
 
   public async fetchData(): Promise<boolean> {
     try {
       if (!this.movieID) throw Error('NO MOVIE ID.');
+
       log.log('fetching data...');
+
       const { data, status } = await getMovieDataByUrlKey(this.movieID);
       if (status !== 200) {
         throw Error("COULDN'T LOAD MOVIE INFO.");
       }
 
       const { id, title } = data;
-
+      this.data = data;
       this.eventId = id;
       this.name = title;
 
@@ -68,7 +72,7 @@ export class IngressoModel {
         throw Error('PROBABLY NO SESSIONS.');
       }
 
-      this.data = data;
+      this.sessions = data;
       return data;
     } catch (error) {
       log.error(error);
@@ -76,60 +80,52 @@ export class IngressoModel {
     }
   }
 
-  public convert(): ICreateEvent[] | undefined {
+  public generateDescription(theater: IIngressoTheater): string {
     try {
-      if (!this.data) {
-        throw Error('NO DATA FOR CONVERSION');
+      if (!theater) {
+        throw Error('No theater provided to generate a description.');
       }
-      if (!Array.isArray(this.data)) {
-        throw Error('DATA IS NOT THE CORRECT TYPE');
-      }
+      const { rooms } = theater;
 
-      return ingressoFilter(this.data);
+      const roomsString = rooms.map(({ name, sessions }) =>
+        [
+          name,
+          sessions
+            .map((session) => `[${session.types[1].alias}] ${session.time}`)
+            .join(' / '),
+        ].join(' - '),
+      );
+
+      const theaterString = [theater.name, roomsString, ''].flat();
+      return theaterString.flat().join('\n');
     } catch (error) {
       log.error(error);
       throw error;
     }
   }
 
-  /*public getAllTheatersName(): Array<string> {
+  public getHorizontalPoster() {
     try {
-      if (!this.data) throw Error('NO DATA FOR CONVERSION');
-    } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
-      throw error;
-    }
-  }*/
+      if (!this.data) {
+        throw Error('Movie information not found, can not get cover image.');
+      }
 
-  /* public getOneTheater(theater: string) {
-    try {
-      if (!this.data) throw Error('NO DATA FOR CONVERSION');
-    } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
-      throw error;
-    }
-  } */
+      const coverData = this.data.images.find(
+        (i) => i.type === 'PosterHorizontal',
+      );
+      if (!coverData) {
+        throw Error('No cover information found.');
+      }
 
-  /* public getDubRooms() {
-    try {
-      if (!this.data) throw Error('NO DATA FOR CONVERSION');
-    } catch (error) {
-      console.error(`[MODEL|INGRESSO] ${error}`);
-      throw error;
-    }
-  } */
+      const { url } = coverData;
+      if (!url) {
+        throw Error('No image found.');
+      }
 
-  public toString(): string {
-    try {
-      if (!this.data) throw Error('NO DATA FOR CONVERSION');
-
-      //TODO: Create description of each room/date/session/theater
-      const description: string[] = [];
-
-      return description.flat().join('\n');
+      return url;
     } catch (error) {
       log.error(error);
-      throw error;
+      return '';
     }
   }
 
@@ -155,14 +151,14 @@ export class IngressoModel {
     }
   }
 
-  public async getCities(uf: string): Promise<IIngressoCity[]> {
+  public async getCities(state: string): Promise<IIngressoCity[]> {
     try {
-      if (!uf) {
+      if (!state) {
         throw Error('Please provide a UF');
       }
-      const states = await this.getStates();
 
-      const cities = states.find((state) => state.uf === uf)?.cities;
+      const states = await this.getStates();
+      const cities = states.find((i) => i.uf === state)?.cities;
 
       return cities || [];
     } catch (error) {

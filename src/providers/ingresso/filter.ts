@@ -34,21 +34,3 @@ export function ingressoFilter(data: IIngressoDayEntry[]): ICreateEvent[] {
 
   return response;
 }
-
-export function theaterToString(theater: IIngressoTheater) {
-  const { rooms } = theater;
-
-  const roomString = rooms.map((room) => {
-    const { name, sessions } = room;
-
-    return [
-      name,
-      sessions
-        .map((session) => `[${session.types[1]}] ${session.time}`)
-        .join(' | '),
-    ].join(' - ');
-  });
-
-  const theaterString = [theater.name, roomString, ''].flat();
-  return theaterString.flat();
-}
