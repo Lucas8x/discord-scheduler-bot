@@ -1,4 +1,6 @@
-# discordbot
+# Discord Movie Event Scheduler
+
+## 🚀 Installation
 
 To install dependencies:
 
@@ -9,7 +11,20 @@ bun install
 To run:
 
 ```bash
-bun run index.ts
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.1.9. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## ⚙ Commands
+
+* `/mes [movie_url]` Create a discord event from the provided movie page
+
+## 🎫 Supported Sites
+
+Currently only one site is supported
+| Site | URL |
+| :--: | -- |
+|Ingresso|<https://www.ingresso.com>|
+
+## 📝 License
+
+This project is under [MIT](./LICENSE) license.
