@@ -28,7 +28,7 @@ export class IngressoModel {
     this.movieID = movieID;
   }
 
-  public getName = () => this.name;
+  public getName = () => this.name ?? '';
 
   public async fetchData(): Promise<boolean> {
     try {

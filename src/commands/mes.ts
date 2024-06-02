@@ -28,19 +28,23 @@ import {
 } from '@/errors/provider.error';
 import { getProvider } from '@/providers/getProvider';
 import { Logger } from '@/utils/logger';
+import { t } from '@/locales/getTranslate';
 
 const log = new Logger('[COMMANDS][MES]', chalk.green);
 
 export const data = new SlashCommandBuilder()
   .setName('mes')
-  .setDescription('create movie event')
+  .setDescription('Create movie event.')
+  .setDescriptionLocalizations({
+    'pt-BR': 'Criar evento de filme.',
+  })
   .addStringOption((option) =>
     option.setName('url').setDescription('Movie url').setRequired(true),
   );
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
-    const { guildId, guild, options } = interaction;
+    const { guildId, guild, options, locale } = interaction;
     if (!guildId) {
       throw new NoGuildIdError();
     }
@@ -50,7 +54,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const initialMessage = interaction;
     await interaction.reply({
-      content: 'Loading...',
+      content: t('loading', locale),
     });
 
     const url = options.getString('url');
@@ -75,13 +79,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
     const ufRow = SelectMenu({
       customId: 'ufSelect',
-      placeholder: 'Selecione o seu estado.',
+      placeholder: t('select.state.placeholder', locale),
       options: states.slice(0, 25), //TODO: pagination
       identifiers: ['uf', 'name'],
     });
 
     await interaction.editReply({
-      content: 'Qual seu estado?',
+      content: t('select.state.message', locale),
       components: [ufRow],
     });
 
@@ -121,13 +125,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
           const cityRow = SelectMenu({
             customId: 'citySelect',
-            placeholder: 'Selecione sua cidade.',
+            placeholder: t('select.city.placeholder', locale),
             options: cities.slice(0, 25),
             identifiers: ['id', 'name'],
           });
 
           await initialMessage.editReply({
-            content: 'Qual sua cidade?',
+            content: t('select.city.message', locale),
             components: [cityRow],
           });
         }
@@ -146,12 +150,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
           const datesRow = SelectMenu({
             customId: 'dateSelect',
-            placeholder: 'Selecione a data',
+            placeholder: t('select.date.placeholder', locale),
             options: availableDates,
           });
 
           await initialMessage.editReply({
-            content: 'Qual sessão deseja assistir?',
+            content: t('select.date.message', locale),
             components: [datesRow],
           });
         }
@@ -170,13 +174,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
           const theatersRow = SelectMenu({
             customId: 'theaterSelect',
-            placeholder: 'Selecione qual cinema.',
+            placeholder: t('select.theater.placeholder', locale),
             options: theaters,
             identifiers: ['id', 'name'],
           });
 
           await initialMessage.editReply({
-            content: 'Qual o cinema?',
+            content: t('select.theater.message', locale),
             components: [theatersRow],
           });
         }
@@ -202,7 +206,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           log.log('Creating event...');
 
           const { id, url: eventURL } = await guild.scheduledEvents.create({
-            name: movie.getName() || 'UNKNOWN MOVIE NAME',
+            name: movie.getName() || t('invalid.movie.replace', locale),
             description: movie.generateDescription(selectedTheater),
             privacyLevel: 2,
             scheduledStartTime: startTime.toISOString(),
@@ -210,7 +214,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             entityType: 3,
             image: movie.getHorizontalPoster(),
             entityMetadata: {
-              location: selectedTheater?.name || 'Unknown theater name',
+              location:
+                selectedTheater?.name || t('unknown.theater.name', locale),
             },
           });
 
@@ -222,8 +227,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
           }
 
           const message = id
-            ? `Successfully scheduled: ${movie.getName()}\nCheckout: ${eventURL}`
-            : 'Event schedule failed.';
+            ? t('success.schedule', locale, movie.getName(), eventURL)
+            : t('failed.schedule', locale);
 
           await initialMessage.editReply({
             content: message,
@@ -245,7 +250,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     });
   } catch (error) {
     const isError = error instanceof Error;
-    const msg = isError ? error.message : 'Something went wrong.';
+    const msg = isError
+      ? error.message
+      : t('something.went.wrong', interaction.locale);
 
     log.error(msg, isError && error?.cause ? `> ${error.cause} <` : '');
 
